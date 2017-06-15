@@ -1,0 +1,29 @@
+//
+//  TJNetworkActivityIndicatorTask.h
+//  TJNetworkActivityIndicatorTask
+//
+//  Created by Tim Johnsen on 6/13/17.
+//
+
+#import <Foundation/Foundation.h>
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface TJNetworkActivityIndicatorTask : NSObject
+
+/// Initialization implicitly begins a task.
+/// Description is used for debugging.
+- (instancetype)initWithTaskDescription:(nullable NSString *)taskDescription;
+- (void)endTask;
+
++ (void)beginTaskWithIdentifier:(NSString *const)identifier;
++ (void)endTaskWithIdentifier:(NSString *const)identifier;
+
+// TODO:
+// Capture stack at init time.
+// Warn if task takes too long.
+
+@end
+
+NS_ASSUME_NONNULL_END
+
