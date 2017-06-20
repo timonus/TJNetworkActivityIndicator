@@ -7,6 +7,10 @@
 
 #import "TJNetworkActivityIndicatorTask.h"
 
+#import <objc/runtime.h>
+
+static const char *kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey = "kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey";
+
 static NSInteger _networkTaskCount;
 static NSMutableDictionary *_adHocTasks;
 static NSHashTable *_activeTasks;
@@ -114,6 +118,23 @@ static NSHashTable *_activeTasks;
     }
     NSAssert(task != nil, @"Attempting to end ad hoc task with identifier %@ that hasn't been started", identifier);
     [task endTask];
+}
+
++ (void)beginTaskForObject:(const id)object
+{
+    TJNetworkActivityIndicatorTask *const task = objc_getAssociatedObject(object, kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey);
+    NSAssert(task, @"Attempting to start ad hoc task on object %@ that's already been started.", object);
+    if (!task) {
+        objc_setAssociatedObject(object, kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey, [[TJNetworkActivityIndicatorTask alloc] init], OBJC_ASSOCIATION_RETAIN);
+    }
+}
+
++ (void)endTaskForObject:(const id)object
+{
+    TJNetworkActivityIndicatorTask *const task = objc_getAssociatedObject(object, kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey);
+    NSAssert(!task, @"Attempting to end ad hoc task on object %@ that has no in progress task.", object);
+    [task endTask];
+    objc_setAssociatedObject(object, kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey, nil, OBJC_ASSOCIATION_RETAIN);
 }
 
 @end

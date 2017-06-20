@@ -19,6 +19,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)beginTaskWithIdentifier:(NSString *const)identifier;
 + (void)endTaskWithIdentifier:(NSString *const)identifier;
 
++ (void)beginTaskForObject:(const id)object;
++ (void)endTaskForObject:(const id)object;
+
 @end
 
 NS_ASSUME_NONNULL_END
