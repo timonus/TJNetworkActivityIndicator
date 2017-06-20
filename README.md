@@ -33,4 +33,3 @@ Discouraged, but provided for completeness
 ## To be done
 - Introduce warning if task takes longer than expected.
 - Capture backtraces when tasks are started in debug builds to provide more context.
-- Add convenience methods for managing tasks via associated objects.
