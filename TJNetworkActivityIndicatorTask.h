@@ -19,10 +19,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)beginTaskWithIdentifier:(NSString *const)identifier;
 + (void)endTaskWithIdentifier:(NSString *const)identifier;
 
-// TODO:
-// Capture stack at init time.
-// Warn if task takes too long.
-
 @end
 
 NS_ASSUME_NONNULL_END
