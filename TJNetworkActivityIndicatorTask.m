@@ -31,8 +31,8 @@ static NSHashTable *_activeTasks;
         _networkTaskCount += increment;
         
         NSAssert(_networkTaskCount >= 0, @"Invalid network task count");
-        if (priorNetworkTaskCount > 0 != _networkTaskCount > 0) {
-            const BOOL networkActivityIndicatorVisible = _networkTaskCount > 0;
+        const BOOL networkActivityIndicatorVisible = _networkTaskCount > 0;
+        if (priorNetworkTaskCount > 0 != networkActivityIndicatorVisible) {
             if ([NSThread isMainThread]) {
                 [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:networkActivityIndicatorVisible];
             } else {
