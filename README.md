@@ -1,17 +1,15 @@
 # TJNetworkActivityIndicatorTask
 
-*This hasn't been shipped in a production app yet and should be considered incomplete*
-
 A manager for your iOS app's network activity indicator.
 
 ## Catches common issues
 - Warns if a task is ended multiple times.
-- Warns if a task is started multiple times (and makes it harder to do so).
-- Threadsafe and dispatches changes to `UIApplication`'s network indicator to main thread correctly.
+- Warns if a task is started multiple times and makes it much harder to do so.
+- Threadsafe and dispatches changes to `UIApplication`'s network indicator on main thread correctly.
 
 ## Usage
 
-Preferred
+Preferred method:
 
 ```
 TJNetworkActivityIndicatorTask *const task = [TJNetworkActivityIndicatorTask new];
@@ -20,7 +18,15 @@ doThingOnNetworkWithCompletion(^ {
 });
 ```
 
-Discouraged, but provided for completeness
+Less preferred, but provided for simplicity:
+
+```
+[TJNetworkActivityIndicatorTask beginTaskForObject:myObject];
+// Later on
+[TJNetworkActivityIndicatorTask endTaskForObject:myObject];
+```
+
+Discouraged, but provided for completeness:
 
 ```
 // Somewhere in your codebase.
