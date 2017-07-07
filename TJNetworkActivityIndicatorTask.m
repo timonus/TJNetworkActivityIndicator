@@ -7,6 +7,7 @@
 
 #import "TJNetworkActivityIndicatorTask.h"
 
+#import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
 static const char *kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey = "kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey";
