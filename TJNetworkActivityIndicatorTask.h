@@ -21,12 +21,6 @@ extern NSString *const TJNetworkActivityIndicatorStateKey;
 - (instancetype)initWithTaskDescription:(nullable NSString *)taskDescription;
 - (void)endTask;
 
-+ (void)beginTaskWithIdentifier:(NSString *const)identifier;
-+ (void)endTaskWithIdentifier:(NSString *const)identifier;
-
-+ (void)beginTaskForObject:(const id)object;
-+ (void)endTaskForObject:(const id)object;
-
 @end
 
 NS_ASSUME_NONNULL_END

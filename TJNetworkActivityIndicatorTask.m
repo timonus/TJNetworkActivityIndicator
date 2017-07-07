@@ -7,19 +7,14 @@
 
 #import "TJNetworkActivityIndicatorTask.h"
 
-#import <UIKit/UIKit.h>
+#import "UIApplication+Opener.h"
 #import <objc/runtime.h>
 #import <os/lock.h>
 
 NSString *const TJNetworkActivityIndicatorStateChangeNotification = @"tj.nic";
 NSString *const TJNetworkActivityIndicatorStateKey = @"tj.nic.s";
 
-static char *const kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey = "kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey";
-
 static NSInteger _networkTaskCount;
-static NSMutableDictionary *_adHocTasks;
-static dispatch_once_t _adHocTasksOnceToken;
-static os_unfair_lock _adHocTasksLock;
 static NSHashTable *_activeTasks;
 
 #if defined(__has_attribute) && __has_attribute(objc_direct_members)
@@ -49,11 +44,11 @@ static void incrementNetworkTaskCount(const NSInteger increment)
     const BOOL networkActivityIndicatorVisible = _networkTaskCount > 0;
     if (priorNetworkTaskCount > 0 != networkActivityIndicatorVisible) {
         if ([NSThread isMainThread]) {
-            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:networkActivityIndicatorVisible];
+            [[UIApplication open_sharedApplication] setNetworkActivityIndicatorVisible:networkActivityIndicatorVisible];
             [[NSNotificationCenter defaultCenter] postNotificationName:TJNetworkActivityIndicatorStateChangeNotification object:nil userInfo:@{TJNetworkActivityIndicatorStateKey: @(networkActivityIndicatorVisible)}];
         } else {
             dispatch_async(dispatch_get_main_queue(), ^{
-                [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:networkActivityIndicatorVisible];
+                [[UIApplication open_sharedApplication] setNetworkActivityIndicatorVisible:networkActivityIndicatorVisible];
                 [[NSNotificationCenter defaultCenter] postNotificationName:TJNetworkActivityIndicatorStateChangeNotification object:nil userInfo:@{TJNetworkActivityIndicatorStateKey: @(networkActivityIndicatorVisible)}];
             });
         }
@@ -108,57 +103,6 @@ static void incrementNetworkTaskCount(const NSInteger increment)
 - (NSString *)description
 {
     return [[super description] stringByAppendingFormat:@" Task Description: %@", self.taskDescription];
-}
-
-+ (void)beginTaskWithIdentifier:(NSString *const)identifier
-{
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        _adHocTasks = [NSMutableDictionary new];
-    });
-    dispatch_once(&_adHocTasksOnceToken, ^{
-        _adHocTasksLock = OS_UNFAIR_LOCK_INIT;
-    });
-    
-    os_unfair_lock_lock(&_adHocTasksLock);
-    TJNetworkActivityIndicatorTask *task = [_adHocTasks objectForKey:identifier];
-    NSAssert(task == nil, @"Attempting to start ad hoc task with identifier %@ that's already been started.", identifier);
-    if (!task) {
-        task = [[TJNetworkActivityIndicatorTask alloc] initWithTaskDescription:identifier];
-        [_adHocTasks setObject:task forKey:identifier];
-    }
-    os_unfair_lock_unlock(&_adHocTasksLock);
-}
-
-+ (void)endTaskWithIdentifier:(NSString *const)identifier
-{
-    TJNetworkActivityIndicatorTask *task = nil;
-    dispatch_once(&_adHocTasksOnceToken, ^{
-        _adHocTasksLock = OS_UNFAIR_LOCK_INIT;
-    });
-    os_unfair_lock_lock(&_adHocTasksLock);
-    task = [_adHocTasks objectForKey:identifier];
-    [_adHocTasks removeObjectForKey:identifier];
-    os_unfair_lock_unlock(&_adHocTasksLock);
-    NSAssert(task != nil, @"Attempting to end ad hoc task with identifier %@ that hasn't been started", identifier);
-    [task endTask];
-}
-
-+ (void)beginTaskForObject:(const id)object
-{
-    TJNetworkActivityIndicatorTask *const task = objc_getAssociatedObject(object, kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey);
-    NSAssert(task, @"Attempting to start ad hoc task on object %@ that's already been started.", object);
-    if (!task) {
-        objc_setAssociatedObject(object, kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey, [TJNetworkActivityIndicatorTask new], OBJC_ASSOCIATION_RETAIN);
-    }
-}
-
-+ (void)endTaskForObject:(const id)object
-{
-    TJNetworkActivityIndicatorTask *const task = objc_getAssociatedObject(object, kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey);
-    NSAssert(!task, @"Attempting to end ad hoc task on object %@ that has no in progress task.", object);
-    [task endTask];
-    objc_setAssociatedObject(object, kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey, nil, OBJC_ASSOCIATION_RETAIN);
 }
 
 @end
