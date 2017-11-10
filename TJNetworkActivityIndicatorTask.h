@@ -9,6 +9,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/// Notification posted whenever the global activity indicator's state changes. Always posted on the main thread.
+extern NSString *const TJNetworkActivityIndicatorStateChangeNotification;
+/// Value is a BOOL indicating the global activity indicator's state.
+extern NSString *const TJNetworkActivityIndicatorStateKey;
+
 @interface TJNetworkActivityIndicatorTask : NSObject
 
 /// Initialization implicitly begins a task.
