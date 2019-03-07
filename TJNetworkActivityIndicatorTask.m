@@ -30,7 +30,12 @@ static NSHashTable *_activeTasks;
 
 + (void)incrementNetworkTaskCount:(const NSInteger)increment
 {
-    @synchronized(self) {
+    static dispatch_queue_t queue;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        queue = dispatch_queue_create("TJNetworkActivityIndicatorTaskQueu", DISPATCH_QUEUE_SERIAL);
+    });
+    dispatch_sync(queue, ^{
         const NSUInteger priorNetworkTaskCount = _networkTaskCount;
         _networkTaskCount += increment;
         
@@ -47,7 +52,7 @@ static NSHashTable *_activeTasks;
                 });
             }
         }
-    }
+    });
 }
 
 - (instancetype)init
