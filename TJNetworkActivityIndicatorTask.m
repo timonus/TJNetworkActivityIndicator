@@ -32,7 +32,7 @@ static NSHashTable *_activeTasks;
 + (void)incrementNetworkTaskCount:(const NSInteger)increment
 {
     static os_unfair_lock lock = OS_UNFAIR_LOCK_INIT;
-        os_unfair_lock_lock(&lock);
+    os_unfair_lock_lock(&lock);
     
     const NSUInteger priorNetworkTaskCount = _networkTaskCount;
     _networkTaskCount += increment;
