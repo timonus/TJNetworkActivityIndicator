@@ -9,6 +9,7 @@
 
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
+#import <os/lock.h>
 
 NSString *const TJNetworkActivityIndicatorStateChangeNotification = @"TJNetworkActivityIndicatorStateChangeNotification";
 NSString *const TJNetworkActivityIndicatorStateKey = @"TJNetworkActivityIndicatorStateKey";
@@ -30,29 +31,27 @@ static NSHashTable *_activeTasks;
 
 + (void)incrementNetworkTaskCount:(const NSInteger)increment
 {
-    static dispatch_queue_t queue;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        queue = dispatch_queue_create("TJNetworkActivityIndicatorTaskQueu", DISPATCH_QUEUE_SERIAL);
-    });
-    dispatch_sync(queue, ^{
-        const NSUInteger priorNetworkTaskCount = _networkTaskCount;
-        _networkTaskCount += increment;
-        
-        NSAssert(_networkTaskCount >= 0, @"Invalid network task count");
-        const BOOL networkActivityIndicatorVisible = _networkTaskCount > 0;
-        if (priorNetworkTaskCount > 0 != networkActivityIndicatorVisible) {
-            if ([NSThread isMainThread]) {
+    static os_unfair_lock lock = OS_UNFAIR_LOCK_INIT;
+        os_unfair_lock_lock(&lock);
+    
+    const NSUInteger priorNetworkTaskCount = _networkTaskCount;
+    _networkTaskCount += increment;
+    
+    NSAssert(_networkTaskCount >= 0, @"Invalid network task count");
+    const BOOL networkActivityIndicatorVisible = _networkTaskCount > 0;
+    if (priorNetworkTaskCount > 0 != networkActivityIndicatorVisible) {
+        if ([NSThread isMainThread]) {
+            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:networkActivityIndicatorVisible];
+            [[NSNotificationCenter defaultCenter] postNotificationName:TJNetworkActivityIndicatorStateChangeNotification object:nil userInfo:@{TJNetworkActivityIndicatorStateKey: @(networkActivityIndicatorVisible)}];
+        } else {
+            dispatch_async(dispatch_get_main_queue(), ^{
                 [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:networkActivityIndicatorVisible];
                 [[NSNotificationCenter defaultCenter] postNotificationName:TJNetworkActivityIndicatorStateChangeNotification object:nil userInfo:@{TJNetworkActivityIndicatorStateKey: @(networkActivityIndicatorVisible)}];
-            } else {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:networkActivityIndicatorVisible];
-                    [[NSNotificationCenter defaultCenter] postNotificationName:TJNetworkActivityIndicatorStateChangeNotification object:nil userInfo:@{TJNetworkActivityIndicatorStateKey: @(networkActivityIndicatorVisible)}];
-                });
-            }
+            });
         }
-    });
+    }
+    
+    os_unfair_lock_unlock(&lock);
 }
 
 - (instancetype)init
