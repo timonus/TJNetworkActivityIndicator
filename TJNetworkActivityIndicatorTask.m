@@ -18,6 +18,8 @@ static const char *kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey = "kT
 
 static NSInteger _networkTaskCount;
 static NSMutableDictionary *_adHocTasks;
+static dispatch_once_t _adHocTasksOnceToken;
+static os_unfair_lock _adHocTasksLock;
 static NSHashTable *_activeTasks;
 
 @interface TJNetworkActivityIndicatorTask ()
@@ -108,24 +110,30 @@ static NSHashTable *_activeTasks;
     dispatch_once(&onceToken, ^{
         _adHocTasks = [NSMutableDictionary new];
     });
+    dispatch_once(&_adHocTasksOnceToken, ^{
+        _adHocTasksLock = OS_UNFAIR_LOCK_INIT;
+    });
     
-    @synchronized(_adHocTasks) {
-        TJNetworkActivityIndicatorTask *task = [_adHocTasks objectForKey:identifier];
-        NSAssert(task == nil, @"Attempting to start ad hoc task with identifier %@ that's already been started.", identifier);
-        if (!task) {
-            task = [[TJNetworkActivityIndicatorTask alloc] initWithTaskDescription:identifier];
-            [_adHocTasks setObject:task forKey:identifier];
-        }
+    os_unfair_lock_lock(&_adHocTasksLock);
+    TJNetworkActivityIndicatorTask *task = [_adHocTasks objectForKey:identifier];
+    NSAssert(task == nil, @"Attempting to start ad hoc task with identifier %@ that's already been started.", identifier);
+    if (!task) {
+        task = [[TJNetworkActivityIndicatorTask alloc] initWithTaskDescription:identifier];
+        [_adHocTasks setObject:task forKey:identifier];
     }
+    os_unfair_lock_unlock(&_adHocTasksLock);
 }
 
 + (void)endTaskWithIdentifier:(NSString *const)identifier
 {
     TJNetworkActivityIndicatorTask *task = nil;
-    @synchronized(_adHocTasks) {
-        task = [_adHocTasks objectForKey:identifier];
-        [_adHocTasks removeObjectForKey:identifier];
-    }
+    dispatch_once(&_adHocTasksOnceToken, ^{
+        _adHocTasksLock = OS_UNFAIR_LOCK_INIT;
+    });
+    os_unfair_lock_lock(&_adHocTasksLock);
+    task = [_adHocTasks objectForKey:identifier];
+    [_adHocTasks removeObjectForKey:identifier];
+    os_unfair_lock_unlock(&_adHocTasksLock);
     NSAssert(task != nil, @"Attempting to end ad hoc task with identifier %@ that hasn't been started", identifier);
     [task endTask];
 }
