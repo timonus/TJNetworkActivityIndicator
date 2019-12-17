@@ -31,7 +31,7 @@ static NSHashTable *_activeTasks;
 
 @implementation TJNetworkActivityIndicatorTask
 
-+ (void)incrementNetworkTaskCount:(const NSInteger)increment
+void incrementNetworkTaskCount(const NSInteger increment)
 {
     static os_unfair_lock lock = OS_UNFAIR_LOCK_INIT;
     os_unfair_lock_lock(&lock);
@@ -39,7 +39,7 @@ static NSHashTable *_activeTasks;
     const NSUInteger priorNetworkTaskCount = _networkTaskCount;
     _networkTaskCount += increment;
     
-    NSAssert(_networkTaskCount >= 0, @"Invalid network task count");
+    NSCAssert(_networkTaskCount >= 0, @"Invalid network task count");
     const BOOL networkActivityIndicatorVisible = _networkTaskCount > 0;
     if (priorNetworkTaskCount > 0 != networkActivityIndicatorVisible) {
         if ([NSThread isMainThread]) {
@@ -59,7 +59,7 @@ static NSHashTable *_activeTasks;
 - (instancetype)init
 {
     if (self = [super init]) {
-        [[self class] incrementNetworkTaskCount:1];
+        incrementNetworkTaskCount(1);
 #if DEBUG
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
@@ -88,7 +88,7 @@ static NSHashTable *_activeTasks;
 {
     NSAssert(!warnOnDuplicateEnd || !self.hasEnded, @"Task ended twice.");
     if (!self.hasEnded) {
-        [[self class] incrementNetworkTaskCount:-1];
+        incrementNetworkTaskCount(-1);
         self.hasEnded = YES;
         NSAssert(!warnOnConfirmedEnd, @"Task ended by deallocation");
     }
