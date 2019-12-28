@@ -11,7 +11,7 @@ A manager for your iOS app's network activity indicator.
 
 Preferred method:
 
-```
+```objc
 TJNetworkActivityIndicatorTask *const task = [TJNetworkActivityIndicatorTask new];
 doThingOnNetworkWithCompletion(^ {
     [task endTask];
@@ -20,7 +20,7 @@ doThingOnNetworkWithCompletion(^ {
 
 Less preferred, but provided for simplicity:
 
-```
+```objc
 [TJNetworkActivityIndicatorTask beginTaskForObject:myObject];
 // Later on
 [TJNetworkActivityIndicatorTask endTaskForObject:myObject];
@@ -28,7 +28,7 @@ Less preferred, but provided for simplicity:
 
 Discouraged, but provided for completeness:
 
-```
+```objc
 // Somewhere in your codebase.
 [TJNetworkActivityIndicatorTask beginTaskWithIdentifier:@"foo"];
 
