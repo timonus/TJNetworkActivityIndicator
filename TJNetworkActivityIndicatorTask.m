@@ -25,7 +25,7 @@ static NSHashTable *_activeTasks;
 @interface TJNetworkActivityIndicatorTask ()
 
 @property (nonatomic, copy) NSString *taskDescription;
-@property (nonatomic, assign) BOOL hasEnded;
+@property (nonatomic) BOOL hasEnded;
 
 @end
 
