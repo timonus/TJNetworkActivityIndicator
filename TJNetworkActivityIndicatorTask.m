@@ -143,7 +143,7 @@ static void incrementNetworkTaskCount(const NSInteger increment)
     TJNetworkActivityIndicatorTask *const task = objc_getAssociatedObject(object, kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey);
     NSAssert(task, @"Attempting to start ad hoc task on object %@ that's already been started.", object);
     if (!task) {
-        objc_setAssociatedObject(object, kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey, [[TJNetworkActivityIndicatorTask alloc] init], OBJC_ASSOCIATION_RETAIN);
+        objc_setAssociatedObject(object, kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey, [TJNetworkActivityIndicatorTask new], OBJC_ASSOCIATION_RETAIN);
     }
 }
 
