@@ -14,7 +14,7 @@
 NSString *const TJNetworkActivityIndicatorStateChangeNotification = @"TJNetworkActivityIndicatorStateChangeNotification";
 NSString *const TJNetworkActivityIndicatorStateKey = @"TJNetworkActivityIndicatorStateKey";
 
-static const char *kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey = "kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey";
+static char *const kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey = "kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey";
 
 static NSInteger _networkTaskCount;
 static NSMutableDictionary *_adHocTasks;
