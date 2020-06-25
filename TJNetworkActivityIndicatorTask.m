@@ -22,7 +22,7 @@ static dispatch_once_t _adHocTasksOnceToken;
 static os_unfair_lock _adHocTasksLock;
 static NSHashTable *_activeTasks;
 
-#if defined(__IPHONE_14_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_14_0
+#if defined(__has_attribute) && __has_attribute(objc_direct_members)
 __attribute__((objc_direct_members))
 #endif
 @interface TJNetworkActivityIndicatorTask ()
@@ -32,7 +32,7 @@ __attribute__((objc_direct_members))
 
 @end
 
-#if defined(__IPHONE_14_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_14_0
+#if defined(__has_attribute) && __has_attribute(objc_direct_members)
 __attribute__((objc_direct_members))
 #endif
 @implementation TJNetworkActivityIndicatorTask
