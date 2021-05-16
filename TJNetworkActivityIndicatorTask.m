@@ -48,14 +48,17 @@ static void incrementNetworkTaskCount(const NSInteger increment)
     NSCAssert(_networkTaskCount >= 0, @"Invalid network task count");
     const BOOL networkActivityIndicatorVisible = _networkTaskCount > 0;
     if (priorNetworkTaskCount > 0 != networkActivityIndicatorVisible) {
-        if ([NSThread isMainThread]) {
+        dispatch_block_t updateBlock = ^{
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:networkActivityIndicatorVisible];
+#pragma clang diagnostic pop
             [[NSNotificationCenter defaultCenter] postNotificationName:TJNetworkActivityIndicatorStateChangeNotification object:nil userInfo:@{TJNetworkActivityIndicatorStateKey: @(networkActivityIndicatorVisible)}];
+        };
+        if ([NSThread isMainThread]) {
+            updateBlock();
         } else {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:networkActivityIndicatorVisible];
-                [[NSNotificationCenter defaultCenter] postNotificationName:TJNetworkActivityIndicatorStateChangeNotification object:nil userInfo:@{TJNetworkActivityIndicatorStateKey: @(networkActivityIndicatorVisible)}];
-            });
+            dispatch_async(dispatch_get_main_queue(), updateBlock);
         }
     }
     
