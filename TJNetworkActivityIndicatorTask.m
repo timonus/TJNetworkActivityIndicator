@@ -11,7 +11,7 @@
 #import <objc/runtime.h>
 #import <os/lock.h>
 
-NSString *const TJNetworkActivityIndicatorStateChangeNotification = @"tj.nic";
+NSNotificationName const TJNetworkActivityIndicatorStateChangeNotification = @"tj.nic";
 NSString *const TJNetworkActivityIndicatorStateKey = @"tj.nic.s";
 
 static char *const kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey = "kTJNetworkActivityIndicatorTaskAdHocAssociatedObjectKey";
